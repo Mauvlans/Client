@@ -114,7 +114,7 @@ $apps = @(
 
     "Microsoft.GetHelp"
 
-    " Microsoft.MixedReality.Portal"
+    "Microsoft.MixedReality.Portal"
 
     "Microsoft.XboxGamingOverlay"
 
