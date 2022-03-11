@@ -26,4 +26,4 @@ Register-ScheduledTask -InputObject $task -TaskName "Trader Weekly Reboot"
 
 #Kick off Schedualed Task
 
-Start-ScheduledTask -TaskName "Trader Weekly Reboot"
+#Start-ScheduledTask -TaskName "Trader Weekly Reboot"
