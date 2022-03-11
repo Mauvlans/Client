@@ -18,7 +18,6 @@
 # register script as scheduled task
 
 $action = New-ScheduledTaskAction -Execute 'cmd.exe' -Argument "/c shutdown -r -f -t 01"
-$trigger =  New-ScheduledTaskTrigger -AtLogon -RandomDelay (New-TimeSpan -Minutes 1)
 $trigger = New-ScheduledTaskTrigger -Weekly -At 7pm -DaysOfWeek Saturday
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -Hidden -DontStopIfGoingOnBatteries -Compatibility Win8
 $principal = New-ScheduledTaskPrincipal -GroupId "NT AUTHORITY\SYSTEM"
