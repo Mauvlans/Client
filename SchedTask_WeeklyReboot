@@ -1,0 +1,30 @@
+# ***************************************************************************
+#
+# Purpose: This script creates a schedualed task and executes Command
+# 
+#
+# ------------- DISCLAIMER -------------------------------------------------
+# This script code is provided as is with no guarantee or waranty concerning
+# the usability or impact on systems and may be used, distributed, and
+# modified in any way provided the parties agree and acknowledge the 
+# Microsoft or Microsoft Partners have neither accountabilty or 
+# responsibility for results produced by use of this script.
+#
+# Microsoft will not provide any support through any means.
+# ------------- DISCLAIMER -------------------------------------------------
+#
+# ***************************************************************************
+
+# register script as scheduled task
+
+$action = New-ScheduledTaskAction -Execute 'cmd.exe' -Argument "/c shutdown -r -f -t 01"
+$trigger =  New-ScheduledTaskTrigger -AtLogon -RandomDelay (New-TimeSpan -Minutes 1)
+$trigger = New-ScheduledTaskTrigger -Weekly -At 7pm -DaysOfWeek Saturday
+$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -Hidden -DontStopIfGoingOnBatteries -Compatibility Win8
+$principal = New-ScheduledTaskPrincipal -GroupId "NT AUTHORITY\SYSTEM"
+$task = New-ScheduledTask -Action $action -Trigger $trigger -Settings $settings -Principal $principal
+Register-ScheduledTask -InputObject $task -TaskName "Trader Weekly Reboot"
+
+#Kick off Schedualed Task
+
+Start-ScheduledTask -TaskName "Trader Weekly Reboot"
