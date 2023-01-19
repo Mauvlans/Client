@@ -1,0 +1,308 @@
+# ***************************************************************************
+#
+# Purpose: DNS Form Updater 
+#
+# ------------- DISCLAIMER -------------------------------------------------
+# This script code is provided as is with no guarantee or waranty concerning
+# the usability or impact on systems and may be used, distributed, and
+# modified in any way provided the parties agree and acknowledge the 
+# Microsoft or Microsoft Partners have neither accountabilty or 
+# responsibility for results produced by use of this script.
+#
+# Microsoft will not provide any support through any means.
+# ------------- DISCLAIMER -------------------------------------------------
+#
+# ***************************************************************************
+
+# Domain Array for Domain Selection Drop Down
+$DropdownDomainArray = @(
+    'corp.contoso.com'
+    )
+
+#Adds forms Assembly and Defines forms funcxtions
+Add-Type -AssemblyName System.Windows.Forms
+[System.Windows.Forms.Application]::EnableVisualStyles()
+
+$Form                            = New-Object system.Windows.Forms.Form
+$Form.ClientSize                  = New-Object System.Drawing.Point(400,430)
+$Form.text                        = "Form"
+$Form.TopMost                     = $false
+
+$Header                          = New-Object system.Windows.Forms.Label
+$Header.text                     = "ACME DNS Updater"
+$Header.AutoSize                 = $true
+$Header.width                    = 25
+$Header.height                   = 10
+$Header.location                 = New-Object System.Drawing.Point(78,20)
+$Header.Font                     = New-Object System.Drawing.Font('Microsoft Sans Serif',18,[System.Drawing.FontStyle]([System.Drawing.FontStyle]::Bold))
+
+$CheckBoxA                       = New-Object system.Windows.Forms.CheckBox
+$CheckBoxA.text                  = "A Record"
+$CheckBoxA.AutoSize              = $false
+$CheckBoxA.width                 = 95
+$CheckBoxA.height                = 20
+$CheckBoxA.location              = New-Object System.Drawing.Point(57,90)
+$CheckBoxA.Font                  = New-Object System.Drawing.Font('Microsoft Sans Serif',12)
+
+$CheckBoxCName                   = New-Object system.Windows.Forms.CheckBox
+$CheckBoxCName.text              = "CName Record"
+$CheckBoxCName.AutoSize          = $false
+$CheckBoxCName.width             = 143
+$CheckBoxCName.height            = 20
+$CheckBoxCName.location          = New-Object System.Drawing.Point(200,90)
+$CheckBoxCName.Font              = New-Object System.Drawing.Font('Microsoft Sans Serif',12)
+
+$Label1                          = New-Object system.Windows.Forms.Label
+$Label1.text                     = "Select One Record Type"
+$Label1.AutoSize                 = $true
+$Label1.width                    = 25
+$Label1.height                   = 10
+$Label1.location                 = New-Object System.Drawing.Point(90,60)
+$Label1.Font                     = New-Object System.Drawing.Font('Microsoft Sans Serif',12)
+
+$DnsZone                         = New-Object system.Windows.Forms.ComboBox
+$DnsZone.text                    = "Choose your Zone"
+$DnsZone.width                   = 206
+$DnsZone.height                  = 20
+$DnsZone.location                = New-Object System.Drawing.Point(152,127)
+$DnsZone.Font                    = New-Object System.Drawing.Font('Microsoft Sans Serif',12)
+
+$Label2                          = New-Object system.Windows.Forms.Label
+$Label2.text                     = "DNS Zone"
+$Label2.AutoSize                 = $true
+$Label2.width                    = 25
+$Label2.height                   = 10
+$Label2.location                 = New-Object System.Drawing.Point(43,127)
+$Label2.Font                     = New-Object System.Drawing.Font('Microsoft Sans Serif',12)
+
+$Label3                          = New-Object system.Windows.Forms.Label
+$Label3.text                     = "Record Name"
+$Label3.AutoSize                 = $true
+$Label3.width                    = 25
+$Label3.height                   = 10
+$Label3.location                 = New-Object System.Drawing.Point(34,174)
+$Label3.Font                     = New-Object System.Drawing.Font('Microsoft Sans Serif',12)
+
+$ResultBox                       = New-Object system.Windows.Forms.Label
+$ResultBox.Text                  = "Click LookUp"
+$ResultBox.AutoSize              = $true
+$ResultBox.width                 = 208
+$ResultBox.height                = 20
+$ResultBox.location              = New-Object System.Drawing.Point(151,266)
+$ResultBox.Font                  = New-Object System.Drawing.Font('Microsoft Sans Serif',12,[System.Drawing.FontStyle]([System.Drawing.FontStyle]::Bold))
+
+$Lookup                          = New-Object system.Windows.Forms.Button
+$Lookup.text                     = "Lookup Record Result"
+$Lookup.width                    = 300
+$Lookup.height                   = 30
+$Lookup.location                 = New-Object System.Drawing.Point(50,215)
+$Lookup.Font                     = New-Object System.Drawing.Font('Microsoft Sans Serif',12,[System.Drawing.FontStyle]([System.Drawing.FontStyle]::Bold))
+$Lookup.ForeColor                = [System.Drawing.ColorTranslator]::FromHtml("#000000")
+$Lookup.BackColor                = [System.Drawing.ColorTranslator]::FromHtml("#4a90e2")
+
+$Label4                          = New-Object system.Windows.Forms.Label
+$Label4.text                     = "Output"
+$Label4.AutoSize                 = $true
+$Label4.width                    = 25
+$Label4.height                   = 10
+$Label4.location                 = New-Object System.Drawing.Point(24,269)
+$Label4.Font                     = New-Object System.Drawing.Font('Microsoft Sans Serif',12)
+
+$RecordName                      = New-Object system.Windows.Forms.TextBox
+$RecordName.multiline            = $false
+$RecordName.width                = 207
+$RecordName.height               = 20
+$RecordName.location             = New-Object System.Drawing.Point(151,174)
+$RecordName.Font                 = New-Object System.Drawing.Font('Microsoft Sans Serif',12)
+
+$UpdatedRecord                   = New-Object system.Windows.Forms.TextBox
+$UpdatedRecord.multiline         = $false
+$UpdatedRecord.width             = 208
+$UpdatedRecord.height            = 20
+$UpdatedRecord.location          = New-Object System.Drawing.Point(151,304)
+$UpdatedRecord.Font              = New-Object System.Drawing.Font('Microsoft Sans Serif',12)
+
+$Label5                          = New-Object system.Windows.Forms.Label
+$Label5.text                     = "Updated Record"
+$Label5.AutoSize                 = $true
+$Label5.width                    = 25
+$Label5.height                   = 10
+$Label5.location                 = New-Object System.Drawing.Point(19,310)
+$Label5.Font                     = New-Object System.Drawing.Font('Microsoft Sans Serif',12)
+
+$UpdateRecord                    = New-Object system.Windows.Forms.Button
+$UpdateRecord.text               = "Update Record"
+$UpdateRecord.width              = 300
+$UpdateRecord.height             = 30
+$UpdateRecord.location           = New-Object System.Drawing.Point(50,350)
+$UpdateRecord.Font               = New-Object System.Drawing.Font('Microsoft Sans Serif',12,[System.Drawing.FontStyle]([System.Drawing.FontStyle]::Bold))
+$UpdateRecord.BackColor          = [System.Drawing.ColorTranslator]::FromHtml("#4a90e2")
+
+$CheckBox1                       = New-Object system.Windows.Forms.CheckBox
+$CheckBox1.text                  = "Prompt for Alt Credentials"
+$CheckBox1.AutoSize              = $false
+$CheckBox1.width                 = 300
+$CheckBox1.height                = 20
+$CheckBox1.location              = New-Object System.Drawing.Point(30,395)
+$CheckBox1.Font                  = New-Object System.Drawing.Font('Microsoft Sans Serif',12)
+
+$Form.controls.AddRange(@($Header,$Label1,$DnsZone,$Label2,$Label3,$ResultBox,$Lookup,$Label4,$RecordName,$UpdatedRecord,$Label5,$UpdateRecord, $CheckBox1, $CheckBoxA, $CheckBoxCName))
+
+ForEach ($Item in $DropDownDomainArray) {
+    [void] $DnsZone.Items.Add($Item)
+}
+
+$Lookup.Add_Click({  
+
+$Zone = $DnsZone.SelectedItem
+$DDNSRecord = $RecordName.Text
+
+
+    if ($CheckBox1.Checked -eq "true") {
+
+      #  Get-Credential
+
+    }
+    
+    if ($CheckBoxA.Checked -eq "true" -and $CheckBoxCName.Checked -eq "true") {
+     
+        $ResultBox.Text = "Select Only 1 Record Type"
+        
+    }
+
+    elseif ($CheckBoxCName.Checked -eq "true") {
+        
+            $Record = Get-DnsServerResourceRecord -ComputerName $Zone -ZoneName $Zone -RRType 'CName' -Name $DDNSRecord #-ErrorAction SilentlyContinue
+  
+            If ($?) {
+
+                $ResultBox.Text = $Record.RecordData.HostNameAlias
+
+            }
+
+            if (!$?) {
+
+                $ResultBox.Text = "No Record Found"
+
+            }
+
+    }
+
+    elseif ($CheckBoxA.Checked -eq "true") {
+
+        $Record = Get-DnsServerResourceRecord -ComputerName $Zone -ZoneName $Zone -RRType 'A' -Name $DDNSRecord #-ErrorAction SilentlyContinue
+
+        If ($?) {
+
+            $ResultBox.Text = $Record.RecordData.IPv4Address.IPAddressToString
+        }
+
+        if (!$?) {
+
+            $ResultBox.Text = "No Record Found"
+
+        }
+    
+    elseif ($CheckBoxA.Checked -eq "true" -and $CheckBoxCName.Checked -eq "true") {
+     
+        $ResultBox.Text = "Select Only 1 Record Type"
+        
+    }
+    
+    }
+    else {
+        $ResultBox.Text = "No Record Type"
+    }
+
+
+})
+
+$UpdateRecord.Add_Click({ 
+
+    $Zone = $DnsZone.SelectedItem
+    $DDNSRecord = $RecordName.Text
+    $Update = $UpdatedRecord.Text
+
+    if ($CheckBox1.Checked -eq "true") {
+
+      #  Get-Credential
+
+    }
+    
+    if ($CheckBoxA.Checked -eq "true" -and $CheckBoxCName.Checked -eq "true") {
+     
+        $ResultBox.Text = "Select Only 1 Record Type"
+        
+    }
+
+    elseif ($CheckBoxCName.Checked -eq "true") {
+
+        $Record = Get-DnsServerResourceRecord -ComputerName $Zone -ZoneName $Zone -RRType 'CName' -Name $DDNSRecord
+
+        $NewRecord = $Record.Clone()
+        $NewRecord.RecordData.HostNameAlias = "$Update"
+        
+        Set-DnsServerResourceRecord -ComputerName $Zone -ZoneName $Zone -OldInputObject $Record -NewInputObject $NewRecord #-ErrorAction SilentlyContinue
+  
+        $ResultBox.Text = "Updated $Update"
+            If ($?) {
+
+                $ResultBox.Text = "Updated $Update"
+
+            }
+
+            if (!$?) {
+                $ResultBox.Text = "Update Failed"
+            }
+
+    }
+
+    elseif ($CheckBoxA.Checked -eq "true") {
+
+        $Record = Get-DnsServerResourceRecord -ComputerName $Zone -ZoneName $Zone -RRType 'A' -Name $DDNSRecord
+
+        $NewRecord = $Record.Clone()
+        $NewRecord.RecordData.IPv4Address = "$Update"
+        
+        Set-DnsServerResourceRecord -ComputerName $Zone -ZoneName $Zone -OldInputObject $Record -NewInputObject $NewRecord #-ErrorAction SilentlyContinue
+
+        If ($?) {
+
+            $ResultBox.Text = "Updated $Update"
+            
+        }
+
+        if (!$?) {
+            $ResultBox.Text = "Update Failed"
+        }
+    
+    }
+
+
+    else {
+        $ResultBox.Text = "No Record Type"
+    }
+
+ 
+})
+
+#
+
+function CheckWindowsFeature {
+    [CmdletBinding()]
+    param(
+        [Parameter(Position=0,Mandatory=$true)] [string]$FeatureName 
+    )  
+  if((Get-WindowsCapability -Name $FeatureName -Online).State -eq "Installed") {
+
+    [void] $Form.ShowDialog()
+
+    } else {
+
+        Add-WindowsCapability -online -Name "Rsat.Dns.Tools~~~~0.0.1.0"
+    
+    }
+  }
+
+  CheckWindowsFeature "Rsat.Dns*"
+
